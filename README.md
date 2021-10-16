@@ -1,6 +1,14 @@
-# Getting Started with Create React App
+# Photo Finder
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Live Project [URL](https://photofinder-kiranmate.netlify.app/)
+
+[Project Source UI](https://github.com/kr017/PhotoFinder)
+
+[Project Server Unsplash APIs](https://unsplash.com/documentation)
+
+## Tech Stack
+
+- React
 
 ## Available Scripts
 
