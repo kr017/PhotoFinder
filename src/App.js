@@ -12,8 +12,8 @@ function App() {
       <Toaster />
       <Header />
       <Switch>
-        <Route path="/" component={Dashboard} exact />
-        <Route path="/login" component={Login} />
+        <Route path="/" component={Login} exact />
+        <Route path="/dash" component={Dashboard} />
         <Route path="" component={NotFound} />
       </Switch>
     </BrowserRouter>
