@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { getPhotos } from "../../api/userService";
+import { getPhotos, likeAPhoto } from "../../api/userService";
 import { usePhotos } from "../../context";
 import { useLocation } from "react-router";
+import FilledFavoriteIcon from "@mui/icons-material/Favorite";
+
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import { Login } from "../../api/auth";
 
 const useStyles = makeStyles({
   root: {
@@ -13,6 +16,66 @@ const useStyles = makeStyles({
 
     "& .imageBlock": {
       padding: "4px",
+      position: "relative",
+
+      "&:hover .like": {
+        opacity: 1,
+      },
+    },
+    "& .like": {
+      // opacity: 0,
+      position: "absolute",
+      top: "20px",
+      right: "20px",
+      cursor: "pointer",
+      backgroundColor: "#fff",
+      padding: "4px 6px",
+      borderRadius: "4px",
+      color: "#787676e6",
+      "&:hover": {
+        opacity: "0.6",
+        color: "#000",
+      },
+    },
+
+    "& .liked": {
+      position: "absolute",
+      top: "20px",
+      right: "20px",
+      cursor: "pointer",
+      backgroundColor: "#f15151",
+      padding: "4px 6px",
+      borderRadius: "4px",
+      color: "#fff",
+      "&:hover": {
+        opacity: "0.6",
+        color: "#fff",
+      },
+    },
+
+    "& .creator": {
+      position: "absolute",
+      bottom: "20px",
+      left: "20px",
+      cursor: "pointer",
+      display: "inline-flex",
+    },
+    "& .creator-profile": {
+      borderRadius: "50%",
+      cursor: "pointer",
+    },
+    "& .creator-name": {
+      alignItems: "center",
+      color: "white",
+      display: "grid",
+      marginLeft: "12px",
+      fontWeight: 600,
+    },
+    "& .for_hire": {
+      fontWeight: 400,
+      fontSize: "12px",
+      display: "flex",
+      alignItems: "center",
     },
     marginTop: "25px",
   },
@@ -23,22 +86,17 @@ export const Dashboard = params => {
   const path = useLocation();
 
   const [cols, setCols] = useState(3);
-  const [page, setPage] = useState(0);
   const { photosState, photosDispatch } = usePhotos();
 
   useEffect(() => {
-    // Login().then(res => {
-    //   userDispatch({ type: "LOGIN", payload: res.data.access_token });
+    Login().then(res => {
+      // userDispatch({ type: "LOGIN", payload: res.data.access_token });
 
-    //   localStorage.setItem("hint", JSON.stringify(res.data.access_token));
-    //   getCurrentUser().then(response => {});
-    // });
+      localStorage.setItem("hint", JSON.stringify(res.data.access_token));
+      // getCurrentUser().then(response => {});
+    });
 
-    let requestParams = {
-      count: 20,
-      page: 0,
-    };
-    loadPhotos(requestParams);
+    loadPhotos();
 
     if (window.innerWidth < 600) {
       setCols(1);
@@ -52,54 +110,69 @@ export const Dashboard = params => {
     // eslint-disable-next-line
   }, [path.pathname]);
 
-  const loadPhotos = payload => {
-    getPhotos(payload).then(res => {
-      let data = [];
-      if (photosState.photos.length > 0) {
-        data = [photosState.photos, ...res.data];
-      } else {
-        data = res.data;
-      }
+  const loadPhotos = () => {
+    getPhotos().then(res => {
       photosDispatch({
         type: "SET_PHOTOS",
-        payload: data,
+        payload: res.data,
       });
     });
   };
-  const fetchMoreData = () => {
-    setPage(page + 1);
-    let requestParams = {
-      count: 20,
-      page: page,
-    };
-    loadPhotos(requestParams);
+
+  const handleLikePhoto = id => {
+    likeAPhoto(id);
   };
+  const handleUnlikePhoto = id => {};
+
   return (
     <div className={classes.root}>
-      {photosState.photos.length}
-      <InfiniteScroll
-        dataLength={500}
-        //   {photosState?.photos?.length ? photosState?.photos?.length : 20
-        // }
-        next={fetchMoreData}
-        hasMore={true}
+      {/* <ScrollList
+        countLimit={10}
+        loadNextData={fetchMoreData}
         loader={<h4>Loading...</h4>}
-      >
-        {photosState?.photos.length && (
-          <ImageList variant="masonry" cols={cols}>
-            {photosState?.photos?.map(item => (
-              <ImageListItem key={item.id} className="imageBlock">
-                <img
-                  src={`${item.urls.regular}`}
-                  srcSet={`${item.urls.regular}`}
-                  alt={item.title}
-                  loading="lazy"
-                />
-              </ImageListItem>
-            ))}
-          </ImageList>
-        )}
-      </InfiniteScroll>
+        children={ */}
+      <ImageList variant="masonry" cols={cols}>
+        {photosState?.photos?.map((item, index) => (
+          <ImageListItem key={item.id} className="imageBlock">
+            {!item?.liked_by_user ? (
+              <span className="like" onClick={() => handleLikePhoto(item.id)}>
+                <FilledFavoriteIcon fontSize="small" />
+              </span>
+            ) : (
+              <span
+                className="liked"
+                onClick={() => handleUnlikePhoto(item.id)}
+              >
+                <FilledFavoriteIcon fontSize="small" />
+              </span>
+            )}
+            <img
+              src={`${item?.urls?.regular}`}
+              srcSet={`${item?.urls?.regular}`}
+              alt={item.title}
+              loading="lazy"
+            />
+
+            <span className="creator">
+              <img
+                src={`${item?.user?.profile_image?.small}`}
+                className="creator-profile"
+                alt="profile_pic"
+              />
+              <span className="creator-name">
+                <div>{item?.user?.first_name}</div>
+                {item?.user?.for_hire && (
+                  <div className="for_hire">
+                    Available for Hire
+                    <CheckCircleOutlineOutlinedIcon />
+                  </div>
+                )}
+              </span>
+            </span>
+          </ImageListItem>
+        ))}
+      </ImageList>
+      {/* } */}
     </div>
   );
 };

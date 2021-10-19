@@ -1,5 +1,9 @@
 import { accessUrl } from "../../api/auth";
 
 export const Login = params => {
-  return <a href={accessUrl}>LOGIN TO SPOTIFY</a>;
+  return (
+    <div style={{ marginTop: "500px" }}>
+      <a href={accessUrl}>LOGIN TO SPOTIFY</a>
+    </div>
+  );
 };

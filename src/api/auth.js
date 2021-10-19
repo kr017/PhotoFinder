@@ -20,7 +20,8 @@ const redirectUri = `${process.env.REACT_APP_REDIRECT_URI}`;
 export const getTokenFromResponse = () => {
   return window.location.href.split("?code=")[1];
 };
-const scopes = "public+read_user+write_user";
+const scopes =
+  "public+read_user+write_user+read_photos+write_photos+write_likes+write_followers+read_collections+write_collections";
 
 export const accessUrl = `${
   authEndpoint + "oauth/authorize"

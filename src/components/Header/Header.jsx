@@ -2,7 +2,19 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../images/1.PNG";
 import { makeStyles } from "@mui/styles";
-import { AppBar, Grid, InputBase } from "@mui/material";
+import {
+  AppBar,
+  Grid,
+  InputBase,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Popover,
+} from "@mui/material";
+
+import StayCurrentLandscapeOutlinedIcon from "@mui/icons-material/StayCurrentLandscapeOutlined";
+import StayCurrentPortraitOutlinedIcon from "@mui/icons-material/StayCurrentPortraitOutlined";
+
 // import { Search } from "@mui/icons-material";
 import { useRef } from "react";
 import { searchPhotos } from "../../api/userService";
@@ -20,6 +32,8 @@ const useStyles = makeStyles({
   header: {
     display: "flex",
     justifyContent: "space-between",
+    color: "black",
+    alignItems: "center",
   },
   catContainer: {
     padding: "0 12px 0 12px",
@@ -30,7 +44,7 @@ const useStyles = makeStyles({
 
   inputRoot: {
     color: "inherit",
-    width: "250px",
+    width: "260px",
     marginLeft: "8px",
   },
   inputInput: {
@@ -73,6 +87,30 @@ export const Header = () => {
   const [searchText, setSearchText] = useState("");
   const { photosDispatch } = usePhotos();
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [orientation, setOrientation] = useState(null);
+  // const [loading, setLoading] = useState(false);
+
+  // const handleClick = event => {
+  //   setAnchorEl(event.currentTarget);
+  // };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const open = Boolean(anchorEl);
+
+  const handleSearch = () => {
+    searchPhotos({
+      query: searchText,
+      // color: "pink",
+      orientation: "squarish",
+    }).then(function (res) {
+      photosDispatch({
+        type: "SET_PHOTOS",
+        payload: res.data.results,
+      });
+    });
+  };
   return (
     <AppBar className={classes.root} style={{ backgroundColor: "white" }}>
       <Grid container className={classes.header}>
@@ -114,25 +152,56 @@ export const Header = () => {
                 inputProps={{
                   "aria-label": "Search",
                 }}
-                onKeyPress={() => {
-                  setSearchText(searchQuery.current.value);
-
-                  searchPhotos({
-                    query: searchText,
-                    // color: "pink",
-                    orientation: "squarish",
-                  }).then(function (res) {
-                    photosDispatch({
-                      type: "SET_PHOTOS",
-                      payload: res.data.results,
-                    });
-                  });
+                onKeyPress={e => {
+                  if (e.charCode === 13) {
+                    // setLoading(true);
+                    setSearchText(searchQuery.current.value);
+                    handleSearch();
+                  }
                 }}
               />
             </div>
           </span>
         </Grid>
+        <Grid
+          onClick={e => setAnchorEl(e.currentTarget)}
+          style={{ cursor: "pointer" }}
+        >
+          {orientation ? <>{orientation}</> : <>Any Orientation</>}
+        </Grid>
       </Grid>
+
+      <Popover
+        // id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+      >
+        <ListItemButton onClick={() => setOrientation("landscape")}>
+          <ListItemIcon>
+            <StayCurrentLandscapeOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Landscape" />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => setOrientation("portrait")}>
+          <ListItemIcon>
+            <StayCurrentPortraitOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Portrait" />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => setOrientation("squarish")}>
+          <ListItemIcon>
+            <StayCurrentLandscapeOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Square" />
+        </ListItemButton>
+      </Popover>
     </AppBar>
   );
 };
