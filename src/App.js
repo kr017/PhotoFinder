@@ -5,15 +5,21 @@ import { Dashboard } from "../src/components/Dashboard/Dashboard";
 import { Login } from "../src/components/Login/Login";
 import { NotFound } from "../src/components/NotFound/NotFound";
 import { Header } from "./components/Header/Header";
+import { Profile } from "./components/Profile/Profile";
+import { PrivateRoutes } from "./PrivateRoutes";
+import { EditProfile } from "./components/Profile/EditProfile";
 
 function App() {
   return (
     <BrowserRouter>
       <Toaster />
-      <Header />
+
       <Switch>
         <Route path="/" component={Login} exact />
-        <Route path="/dash" component={Dashboard} />
+        <PrivateRoutes path="/dash" component={Dashboard} />
+        <PrivateRoutes path="/profile" component={Profile} exact />
+        <PrivateRoutes path="/editProfile" component={EditProfile} />
+
         <Route path="" component={NotFound} />
       </Switch>
     </BrowserRouter>

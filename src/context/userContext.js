@@ -4,31 +4,17 @@ const userContext = createContext();
 
 const userReducer = (state, action) => {
   switch (action.type) {
-    case "LOGIN":
-      return {
-        ...state,
-        name: action.payload.name,
-        email: action.payload.email,
-        token: action.payload.token,
-      };
-
-    case "LOGOUT":
-      return {
-        name: "",
-        email: "",
-        token: "",
-      };
-    case "SET_ADDRESSES_LIST":
-      return { ...state, addresses: action?.payload };
-
-    case "SET_SELECTED_ADDRESS":
-      return { ...state, selectedAddress: action?.payload };
-
     case "SET_TOKEN":
       return {
         ...state,
         token: action?.payload,
       };
+    case "LOGOUT":
+      return {
+        token: "",
+      };
+    case "SET_CURRENT_USER":
+      return { ...state, user: action?.payload };
 
     default:
       return;
@@ -36,9 +22,8 @@ const userReducer = (state, action) => {
 };
 
 const initalState = {
-  name: "",
-  email: "",
   token: "",
+  user: null,
 };
 
 export const UserProvider = ({ children }) => {

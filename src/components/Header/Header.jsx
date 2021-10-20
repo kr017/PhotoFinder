@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useHistory } from "react-router-dom";
+
 import { Link } from "react-router-dom";
 import logo from "../../images/1.PNG";
 import { makeStyles } from "@mui/styles";
@@ -18,7 +20,9 @@ import StayCurrentPortraitOutlinedIcon from "@mui/icons-material/StayCurrentPort
 // import { Search } from "@mui/icons-material";
 import { useRef } from "react";
 import { searchPhotos } from "../../api/userService";
-import { usePhotos } from "../../context";
+import { useLogin, usePhotos } from "../../context";
+import default_profile from "../../images/default_profile.jpg";
+
 const useStyles = makeStyles({
   root: {
     position: "sticky",
@@ -79,15 +83,25 @@ const useStyles = makeStyles({
     justifyContent: "center",
     cursor: "pointer",
   },
+  profilePic: {
+    height: "40px",
+    width: "40px",
+    borderRadius: "50%",
+  },
 });
 
 export const Header = () => {
   const classes = useStyles();
+  const history = useHistory();
+
   const searchQuery = useRef();
   const [searchText, setSearchText] = useState("");
+  const { userState, userDispatch } = useLogin();
   const { photosDispatch } = usePhotos();
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+
   const [orientation, setOrientation] = useState(null);
   // const [loading, setLoading] = useState(false);
 
@@ -97,7 +111,6 @@ export const Header = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const open = Boolean(anchorEl);
 
   const handleSearch = () => {
     searchPhotos({
@@ -111,6 +124,16 @@ export const Header = () => {
       });
     });
   };
+
+  const handleNavigateToProfile = () => {
+    history.push("/profile");
+  };
+
+  const handleLogout = () => {
+    userDispatch({ type: "LOGOUT" });
+    localStorage.removeItem("hint");
+  };
+
   return (
     <AppBar className={classes.root} style={{ backgroundColor: "white" }}>
       <Grid container className={classes.header}>
@@ -165,15 +188,54 @@ export const Header = () => {
         </Grid>
         <Grid
           onClick={e => setAnchorEl(e.currentTarget)}
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", minWidth: "120px" }}
+          display={{ xs: "none", sm: "block" }}
         >
           {orientation ? <>{orientation}</> : <>Any Orientation</>}
         </Grid>
+
+        <Grid
+          onClick={e => setMenuAnchorEl(e.currentTarget)}
+          style={{ cursor: "pointer" }}
+        >
+          <img
+            className={classes.profilePic}
+            src={
+              userState?.user?.profile_image?.small
+                ? userState?.user?.profile_image?.small
+                : default_profile
+            }
+            alt="profile_img"
+          />
+        </Grid>
       </Grid>
 
+      {/* menu */}
       <Popover
         // id={id}
-        open={open}
+        open={Boolean(menuAnchorEl)}
+        anchorEl={menuAnchorEl}
+        onClose={() => {
+          setMenuAnchorEl(null);
+        }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+      >
+        <ListItemButton onClick={() => handleNavigateToProfile()}>
+          <ListItemText primary="View Profile" />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => handleLogout()}>
+          <ListItemText primary="Logout" />
+        </ListItemButton>
+      </Popover>
+
+      {/* orientation */}
+      <Popover
+        // id={id}
+        open={Boolean(anchorEl)}
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{

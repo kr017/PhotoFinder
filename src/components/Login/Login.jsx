@@ -5,7 +5,20 @@ export const Login = params => {
     <div
       style={{ display: "flex", justifyContent: "center", marginTop: "40vh" }}
     >
-      <a href={accessUrl}>LOGIN TO SPOTIFY</a>
+      <div style={{}}>
+        <a
+          href={accessUrl}
+          style={{
+            color: "inherit",
+            textDecoration: "none",
+            textTransform: "uppercase",
+            padding: "10px",
+            backgroundColor: "#add8e6",
+          }}
+        >
+          LOGIN TO Photo Finder
+        </a>
+      </div>
     </div>
   );
 };

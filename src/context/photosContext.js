@@ -7,9 +7,24 @@ const photosReducer = (state, action) => {
     case "SET_PHOTOS":
       return { ...state, photos: action?.payload };
 
-    case "SET_LIKE_ITEMS":
-      return { ...state, likedPhotos: action?.payload };
-
+    case "LIKE_PHOTO":
+      let index = state?.photos?.findIndex(x => x.id === action.payload);
+      if (index > -1) {
+        state.photos[index].liked_by_user = true;
+      }
+      return {
+        ...state,
+        photos: state.photos,
+      };
+    case "UNLIKE_PHOTO":
+      let item = state.photos.findIndex(x => x.id === action.payload);
+      if (item > -1) {
+        state.photos[item].liked_by_user = false;
+      }
+      return {
+        ...state,
+        photos: state.photos,
+      };
     case "REMOVE_LIKE_ITEMS":
       return {
         ...state,

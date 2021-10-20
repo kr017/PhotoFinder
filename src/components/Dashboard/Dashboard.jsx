@@ -2,17 +2,19 @@ import { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
-import { getPhotos, likeAPhoto } from "../../api/userService";
+import { getPhotos, likeAPhoto, unlikeAPhoto } from "../../api/userService";
 import { usePhotos } from "../../context";
-import { useLocation } from "react-router";
+import { useLocation } from "react-router-dom";
 import FilledFavoriteIcon from "@mui/icons-material/Favorite";
 
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import { Login } from "../../api/auth";
+import { Header } from "../Header/Header";
 
 const useStyles = makeStyles({
   root: {
-    padding: "4px",
+    paddingTop: "20px",
 
     "& .imageBlock": {
       padding: "4px",
@@ -21,9 +23,18 @@ const useStyles = makeStyles({
       "&:hover .like": {
         opacity: 1,
       },
+      "&:hover .liked": {
+        opacity: 1,
+      },
+      "&:hover .creator": {
+        opacity: 1,
+      },
+      "&:hover .download": {
+        opacity: 1,
+      },
     },
     "& .like": {
-      // opacity: 0,
+      opacity: 0,
       position: "absolute",
       top: "20px",
       right: "20px",
@@ -39,6 +50,7 @@ const useStyles = makeStyles({
     },
 
     "& .liked": {
+      opacity: 0,
       position: "absolute",
       top: "20px",
       right: "20px",
@@ -59,7 +71,9 @@ const useStyles = makeStyles({
       left: "20px",
       cursor: "pointer",
       display: "inline-flex",
+      opacity: 0,
     },
+
     "& .creator-profile": {
       borderRadius: "50%",
       cursor: "pointer",
@@ -78,6 +92,17 @@ const useStyles = makeStyles({
       alignItems: "center",
     },
     marginTop: "25px",
+    "& .download": {
+      position: "absolute",
+      bottom: "20px",
+      right: "20px",
+      cursor: "pointer",
+      display: "inline-flex",
+      opacity: 0,
+      backgroundColor: "#efefefe6",
+      padding: "4px 6px",
+      borderRadius: "4px",
+    },
   },
 });
 
@@ -93,7 +118,6 @@ export const Dashboard = params => {
       // userDispatch({ type: "LOGIN", payload: res.data.access_token });
 
       localStorage.setItem("hint", JSON.stringify(res.data.access_token));
-      // getCurrentUser().then(response => {});
     });
 
     loadPhotos();
@@ -120,17 +144,50 @@ export const Dashboard = params => {
   };
 
   const handleLikePhoto = id => {
-    likeAPhoto(id);
+    likeAPhoto(id).then(res => {
+      photosDispatch({
+        type: "LIKE_PHOTO",
+        payload: id,
+      });
+    });
   };
-  const handleUnlikePhoto = id => {};
+  const handleUnlikePhoto = id => {
+    unlikeAPhoto(id)
+      .then(res => {
+        photosDispatch({
+          type: "UNLIKE_PHOTO",
+          payload: id,
+        });
+      })
+      .catch(err => {});
+  };
+
+  const downloadPhoto = async item => {
+    try {
+      const a = document.createElement("a");
+      a.href = await toDataURL(item.urls.raw);
+      a.download = item.user.first_name + "-" + item.id + ".png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      console.error("Unable to download image...");
+    }
+  };
+
+  function toDataURL(url) {
+    return fetch(url)
+      .then(response => {
+        return response.blob();
+      })
+      .then(blob => {
+        return window.URL.createObjectURL(blob);
+      });
+  }
 
   return (
     <div className={classes.root}>
-      {/* <ScrollList
-        countLimit={10}
-        loadNextData={fetchMoreData}
-        loader={<h4>Loading...</h4>}
-        children={ */}
+      <Header />
       <ImageList variant="masonry" cols={cols}>
         {photosState?.photos?.map((item, index) => (
           <ImageListItem key={item.id} className="imageBlock">
@@ -149,7 +206,7 @@ export const Dashboard = params => {
             <img
               src={`${item?.urls?.regular}`}
               srcSet={`${item?.urls?.regular}`}
-              alt={item.title}
+              alt={item?.title}
               loading="lazy"
             />
 
@@ -169,10 +226,12 @@ export const Dashboard = params => {
                 )}
               </span>
             </span>
+            <span className="download" onClick={() => downloadPhoto(item)}>
+              <ArrowDownwardRoundedIcon />
+            </span>
           </ImageListItem>
         ))}
       </ImageList>
-      {/* } */}
     </div>
   );
 };

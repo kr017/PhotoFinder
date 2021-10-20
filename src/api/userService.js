@@ -18,6 +18,9 @@ export function getPhoto(data) {
 export function likeAPhoto(data) {
   return axiosClient.post("/photos/" + data + "/like");
 }
+export function unlikeAPhoto(data) {
+  return axiosClient.delete("/photos/" + data + "/like");
+}
 
 export function searchPhotos(data) {
   let color = data.color ? data.color : null;
@@ -34,4 +37,7 @@ export function searchPhotos(data) {
   return axiosClient.get(url);
 }
 
+export function handleEditUser(data) {
+  return axiosClient.put("/me", data);
+}
 // &per_page=${count}&page=${currentPage}
