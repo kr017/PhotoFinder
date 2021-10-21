@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
+import toast from "react-hot-toast";
 import { makeStyles } from "@mui/styles";
-import ImageList from "@mui/material/ImageList";
-import ImageListItem from "@mui/material/ImageListItem";
-import { getPhotos, likeAPhoto, unlikeAPhoto } from "../../api/userService";
-import { usePhotos } from "../../context";
-import { useLocation } from "react-router-dom";
+import { ImageList, ImageListItem } from "@mui/material";
 import FilledFavoriteIcon from "@mui/icons-material/Favorite";
-
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
+
+import {
+  getCurrentUser,
+  getPhotos,
+  likeAPhoto,
+  unlikeAPhoto,
+} from "../../api/userService";
+import { useLogin, usePhotos } from "../../context";
 import { Login } from "../../api/auth";
 import { Header } from "../Header/Header";
+import { Loader } from "../Loader/Loader";
 
 const useStyles = makeStyles({
   root: {
@@ -108,19 +114,44 @@ const useStyles = makeStyles({
 
 export const Dashboard = params => {
   const classes = useStyles();
-  const path = useLocation();
+  const history = useHistory();
 
   const [cols, setCols] = useState(3);
+  // eslint-disable-next-line
+  const [loading, setLoading] = useState(false);
+
   const { photosState, photosDispatch } = usePhotos();
+  const { userDispatch } = useLogin();
 
   useEffect(() => {
     Login().then(res => {
-      // userDispatch({ type: "LOGIN", payload: res.data.access_token });
+      if (res.status === 200) {
+        setLoading(true);
+        getCurrentUser()
+          .then(response => {
+            userDispatch({ type: "SET_CURRENT_USER", payload: response.data });
+          })
+          .catch(err => {
+            setLoading(false);
+            toast(
+              t => (
+                <div>Session Expired or invalid token. Please login again.</div>
+              ),
+              {
+                style: {
+                  borderRadius: "10px",
+                  // background: "#f15151",
+                  // color: "#fff",
+                },
+              }
+            );
+            history.push("/");
+          });
+        localStorage.setItem("hint", JSON.stringify(res.data.access_token));
 
-      localStorage.setItem("hint", JSON.stringify(res.data.access_token));
+        loadPhotos();
+      }
     });
-
-    loadPhotos();
 
     if (window.innerWidth < 600) {
       setCols(1);
@@ -132,15 +163,33 @@ export const Dashboard = params => {
       setCols(4);
     }
     // eslint-disable-next-line
-  }, [path.pathname]);
+  }, []);
 
   const loadPhotos = () => {
-    getPhotos().then(res => {
-      photosDispatch({
-        type: "SET_PHOTOS",
-        payload: res.data,
+    let request = {
+      orientation: null,
+    };
+    getPhotos(request)
+      .then(res => {
+        setLoading(false);
+        if (res.status === 200) {
+          photosDispatch({
+            type: "SET_PHOTOS",
+            payload: res.data,
+          });
+        } else if (res.status === 401) {
+          toast(t => (
+            <span>Something went wrong please try after some time</span>
+          ));
+        }
+      })
+      .catch(err => {
+        setLoading(false);
+        toast(t => (
+          <div>Session Expired or invalid token. Please login again.</div>
+        ));
+        history.push("/");
       });
-    });
   };
 
   const handleLikePhoto = id => {
@@ -188,50 +237,64 @@ export const Dashboard = params => {
   return (
     <div className={classes.root}>
       <Header />
-      <ImageList variant="masonry" cols={cols}>
-        {photosState?.photos?.map((item, index) => (
-          <ImageListItem key={item.id} className="imageBlock">
-            {!item?.liked_by_user ? (
-              <span className="like" onClick={() => handleLikePhoto(item.id)}>
-                <FilledFavoriteIcon fontSize="small" />
-              </span>
-            ) : (
-              <span
-                className="liked"
-                onClick={() => handleUnlikePhoto(item.id)}
-              >
-                <FilledFavoriteIcon fontSize="small" />
-              </span>
-            )}
-            <img
-              src={`${item?.urls?.regular}`}
-              srcSet={`${item?.urls?.regular}`}
-              alt={item?.title}
-              loading="lazy"
-            />
 
-            <span className="creator">
+      {photosState?.photos ? (
+        <ImageList variant="masonry" cols={cols}>
+          {photosState?.photos?.map((item, index) => (
+            <ImageListItem key={item.id} className="imageBlock">
+              {!item?.liked_by_user ? (
+                <span className="like" onClick={() => handleLikePhoto(item.id)}>
+                  <FilledFavoriteIcon fontSize="small" />
+                </span>
+              ) : (
+                <span
+                  className="liked"
+                  onClick={() => handleUnlikePhoto(item.id)}
+                >
+                  <FilledFavoriteIcon fontSize="small" />
+                </span>
+              )}
               <img
-                src={`${item?.user?.profile_image?.small}`}
-                className="creator-profile"
-                alt="profile_pic"
+                src={`${item?.urls?.regular}`}
+                srcSet={`${item?.urls?.regular}`}
+                alt={item?.title}
+                loading="lazy"
               />
-              <span className="creator-name">
-                <div>{item?.user?.first_name}</div>
-                {item?.user?.for_hire && (
-                  <div className="for_hire">
-                    Available for Hire
-                    <CheckCircleOutlineOutlinedIcon />
-                  </div>
-                )}
+
+              <span className="creator">
+                <img
+                  src={`${item?.user?.profile_image?.small}`}
+                  className="creator-profile"
+                  alt="profile_pic"
+                />
+                <span className="creator-name">
+                  <div>{item?.user?.first_name}</div>
+                  {item?.user?.for_hire && (
+                    <div className="for_hire">
+                      Available for Hire
+                      <CheckCircleOutlineOutlinedIcon />
+                    </div>
+                  )}
+                </span>
               </span>
-            </span>
-            <span className="download" onClick={() => downloadPhoto(item)}>
-              <ArrowDownwardRoundedIcon />
-            </span>
-          </ImageListItem>
-        ))}
-      </ImageList>
+              <span
+                className="download"
+                onClick={() => {
+                  toast.promise(downloadPhoto(item), {
+                    loading: "Downloading...",
+                    success: <b>Download Successful!!!</b>,
+                    error: <b>Failed to download Please try again.</b>,
+                  });
+                }}
+              >
+                <ArrowDownwardRoundedIcon />
+              </span>
+            </ImageListItem>
+          ))}
+        </ImageList>
+      ) : (
+        <Loader />
+      )}
     </div>
   );
 };

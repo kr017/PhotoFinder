@@ -5,10 +5,10 @@ export function getCurrentUser() {
 }
 
 //
-export function getPhotos() {
+export function getPhotos(data) {
   // let count = data.count;
   // let currentPage = data.page;
-  return axiosClient.get(`photos?per_page=${40}&orientation=landscape`);
+  return axiosClient.get(`photos?per_page=${40}`);
 }
 
 export function getPhoto(data) {

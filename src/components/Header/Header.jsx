@@ -112,11 +112,11 @@ export const Header = () => {
     setAnchorEl(null);
   };
 
-  const handleSearch = () => {
+  const handleSearch = choice => {
     searchPhotos({
       query: searchText,
       // color: "pink",
-      orientation: "squarish",
+      orientation: choice ? choice : orientation,
     }).then(function (res) {
       photosDispatch({
         type: "SET_PHOTOS",
@@ -132,13 +132,20 @@ export const Header = () => {
   const handleLogout = () => {
     userDispatch({ type: "LOGOUT" });
     localStorage.removeItem("hint");
+    history.push("/");
+  };
+
+  const handleOrientaionChange = choice => {
+    setOrientation(choice);
+    setAnchorEl(null);
+    handleSearch(choice);
   };
 
   return (
     <AppBar className={classes.root} style={{ backgroundColor: "white" }}>
       <Grid container className={classes.header}>
         <Link
-          to="/"
+          to="/dash"
           className={`${classes.catContainer}`}
           style={{
             marginRight: "20px",
@@ -186,13 +193,19 @@ export const Header = () => {
             </div>
           </span>
         </Grid>
-        <Grid
-          onClick={e => setAnchorEl(e.currentTarget)}
-          style={{ cursor: "pointer", minWidth: "120px" }}
-          display={{ xs: "none", sm: "block" }}
-        >
-          {orientation ? <>{orientation}</> : <>Any Orientation</>}
-        </Grid>
+        {searchText.length > 0 && (
+          <Grid
+            onClick={e => setAnchorEl(e.currentTarget)}
+            style={{
+              cursor: "pointer",
+              minWidth: "120px",
+              textTransform: "capitalize",
+            }}
+            display={{ xs: "none", sm: "block" }}
+          >
+            {orientation ? <>{orientation}</> : <>Any Orientation</>}
+          </Grid>
+        )}
 
         <Grid
           onClick={e => setMenuAnchorEl(e.currentTarget)}
@@ -242,22 +255,23 @@ export const Header = () => {
           vertical: "bottom",
           horizontal: "left",
         }}
+        style={{ textTransform: "capitalize" }}
       >
-        <ListItemButton onClick={() => setOrientation("landscape")}>
+        <ListItemButton onClick={() => handleOrientaionChange("landscape")}>
           <ListItemIcon>
             <StayCurrentLandscapeOutlinedIcon />
           </ListItemIcon>
           <ListItemText primary="Landscape" />
         </ListItemButton>
 
-        <ListItemButton onClick={() => setOrientation("portrait")}>
+        <ListItemButton onClick={() => handleOrientaionChange("portrait")}>
           <ListItemIcon>
             <StayCurrentPortraitOutlinedIcon />
           </ListItemIcon>
           <ListItemText primary="Portrait" />
         </ListItemButton>
 
-        <ListItemButton onClick={() => setOrientation("squarish")}>
+        <ListItemButton onClick={() => handleOrientaionChange("squarish")}>
           <ListItemIcon>
             <StayCurrentLandscapeOutlinedIcon />
           </ListItemIcon>

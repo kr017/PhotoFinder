@@ -6,6 +6,22 @@ Live Project [URL](https://photofinder-kiranmate.netlify.app/)
 
 [Project Server Unsplash APIs](https://unsplash.com/documentation)
 
+## Description
+
+This is a Quiz App.
+
+### Features
+
+- SignIn
+- SignUp
+- View Photo
+- Like Photo
+- Unlike Photo
+- Download Photo
+- Search Photo with orientation
+- Profile
+- Edit Profile
+
 ## Tech Stack
 
 - React

@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { makeStyles } from "@mui/styles";
-import { getCurrentUser } from "../../api/userService";
 import { useLogin } from "../../context";
 import EditIcon from "@mui/icons-material/Edit";
 import default_profile from "../../images/default_profile.jpg";
@@ -66,13 +64,7 @@ const useStyles = makeStyles({
 export const Profile = () => {
   const classes = useStyles();
   const history = useHistory();
-  const { userState, userDispatch } = useLogin();
-  useEffect(() => {
-    getCurrentUser().then(response => {
-      userDispatch({ type: "SET_CURRENT_USER", payload: response.data });
-    });
-    // eslint-disable-next-line
-  }, []);
+  const { userState } = useLogin();
 
   return (
     <div className={classes.root}>
@@ -91,10 +83,10 @@ export const Profile = () => {
       <div className={classes.section2}>
         <div className={classes.name}>
           {userState?.user?.first_name && (
-            <span>{userState?.user?.first_name}</span>
+            <span>{userState?.user?.first_name + " "}</span>
           )}
           {userState?.user?.last_name && (
-            <span>{userState?.user?.last_name}</span>
+            <span> {" " + userState?.user?.last_name}</span>
           )}
 
           <span
