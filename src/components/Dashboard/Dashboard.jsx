@@ -166,7 +166,7 @@ export const Dashboard = params => {
     try {
       const a = document.createElement("a");
       a.href = await toDataURL(item.urls.raw);
-      a.download = item.user.first_name + "-" + item.id + ".png";
+      a.download = item.user.first_name + "-" + item.id + ".jpg";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
