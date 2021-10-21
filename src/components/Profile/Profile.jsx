@@ -71,6 +71,7 @@ export const Profile = () => {
     getCurrentUser().then(response => {
       userDispatch({ type: "SET_CURRENT_USER", payload: response.data });
     });
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -114,6 +115,7 @@ export const Profile = () => {
                 className={classes.anchor}
                 href={`https://www.instagram.com/${userState?.user?.social?.instagram_username}`}
                 target="_blank"
+                rel="noreferrer"
               >
                 INSTAGRAM
               </a>
@@ -125,6 +127,7 @@ export const Profile = () => {
                 className={classes.anchor}
                 href={`https://twitter.com/${userState?.user?.social?.twitter_username}`}
                 target="_blank"
+                rel="noreferrer"
               >
                 TWITTER
               </a>

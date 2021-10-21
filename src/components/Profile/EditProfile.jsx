@@ -76,7 +76,10 @@ export const EditProfile = () => {
       twitter_username: twitterName,
     };
 
-    handleEditUser(requestParams).then(res => {});
+    handleEditUser(requestParams).then(res => {
+      userDispatch({ type: "SET_CURRENT_USER", payload: res.data });
+      history.push("/profile");
+    });
   };
   return (
     <div className={classes.root}>

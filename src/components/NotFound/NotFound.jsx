@@ -11,7 +11,7 @@ export const NotFound = params => {
         height: "100vh",
       }}
     >
-      <img src={notfound} />
+      <img src={notfound} alt="not_found" />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { Dashboard } from "../src/components/Dashboard/Dashboard";
 import { Login } from "../src/components/Login/Login";
 import { NotFound } from "../src/components/NotFound/NotFound";
-import { Header } from "./components/Header/Header";
+
 import { Profile } from "./components/Profile/Profile";
 import { PrivateRoutes } from "./PrivateRoutes";
 import { EditProfile } from "./components/Profile/EditProfile";
