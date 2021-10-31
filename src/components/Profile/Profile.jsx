@@ -69,8 +69,8 @@ export const Profile = () => {
   const classes = useStyles();
   const history = useHistory();
   const { userState } = useLogin();
-  const { photosState, photosDispatch } = usePhotos();
-
+  const { photosState } = usePhotos();
+  // eslint-disable-next-line
   const [cols, setCols] = useState(3);
 
   return (

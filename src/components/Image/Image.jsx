@@ -104,6 +104,7 @@ const useStyles = makeStyles({
 export const ImageTile = props => {
   const { item } = props;
   const classes = useStyles();
+  // eslint-disable-next-line
   const history = useHistory();
 
   const { photosDispatch } = usePhotos();
