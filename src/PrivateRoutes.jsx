@@ -5,5 +5,5 @@ import { useLogin } from "./context";
 export const PrivateRoutes = ({ ...props }) => {
   const { userState } = useLogin();
 
-  return <>{userState?.token ? <Route {...props} /> : <Redirect to="/" />}</>;
+  return <>{userState?.user ? <Route {...props} /> : <Redirect to="/" />}</>;
 };

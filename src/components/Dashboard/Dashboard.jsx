@@ -2,21 +2,14 @@ import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import toast from "react-hot-toast";
 import { makeStyles } from "@mui/styles";
-import { ImageList, ImageListItem } from "@mui/material";
-import FilledFavoriteIcon from "@mui/icons-material/Favorite";
-import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
-import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
+import { ImageList } from "@mui/material";
 
-import {
-  getCurrentUser,
-  getPhotos,
-  likeAPhoto,
-  unlikeAPhoto,
-} from "../../api/userService";
+import { getCurrentUser, getPhotos } from "../../api/userService";
 import { useLogin, usePhotos } from "../../context";
 import { Login } from "../../api/auth";
 import { Header } from "../Header/Header";
 import { Loader } from "../Loader/Loader";
+import { ImageTile } from "../Image/Image";
 
 const useStyles = makeStyles({
   root: {
@@ -192,109 +185,21 @@ export const Dashboard = params => {
       });
   };
 
-  const handleLikePhoto = id => {
-    likeAPhoto(id).then(res => {
-      photosDispatch({
-        type: "LIKE_PHOTO",
-        payload: id,
-      });
-    });
-  };
-  const handleUnlikePhoto = id => {
-    unlikeAPhoto(id)
-      .then(res => {
-        photosDispatch({
-          type: "UNLIKE_PHOTO",
-          payload: id,
-        });
-      })
-      .catch(err => {});
-  };
-
-  const downloadPhoto = async item => {
-    try {
-      const a = document.createElement("a");
-      a.href = await toDataURL(item.urls.raw);
-      a.download = item.user.first_name + "-" + item.id + ".jpg";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch {
-      console.error("Unable to download image...");
-    }
-  };
-
-  function toDataURL(url) {
-    return fetch(url)
-      .then(response => {
-        return response.blob();
-      })
-      .then(blob => {
-        return window.URL.createObjectURL(blob);
-      });
-  }
-
   return (
     <div className={classes.root}>
       <Header />
 
-      {photosState?.photos ? (
-        <ImageList variant="masonry" cols={cols}>
-          {photosState?.photos?.map((item, index) => (
-            <ImageListItem key={item.id} className="imageBlock">
-              {!item?.liked_by_user ? (
-                <span className="like" onClick={() => handleLikePhoto(item.id)}>
-                  <FilledFavoriteIcon fontSize="small" />
-                </span>
-              ) : (
-                <span
-                  className="liked"
-                  onClick={() => handleUnlikePhoto(item.id)}
-                >
-                  <FilledFavoriteIcon fontSize="small" />
-                </span>
-              )}
-              <img
-                src={`${item?.urls?.regular}`}
-                srcSet={`${item?.urls?.regular}`}
-                alt={item?.title}
-                loading="lazy"
-              />
-
-              <span className="creator">
-                <img
-                  src={`${item?.user?.profile_image?.small}`}
-                  className="creator-profile"
-                  alt="profile_pic"
-                />
-                <span className="creator-name">
-                  <div>{item?.user?.first_name}</div>
-                  {item?.user?.for_hire && (
-                    <div className="for_hire">
-                      Available for Hire
-                      <CheckCircleOutlineOutlinedIcon />
-                    </div>
-                  )}
-                </span>
-              </span>
-              <span
-                className="download"
-                onClick={() => {
-                  toast.promise(downloadPhoto(item), {
-                    loading: "Downloading...",
-                    success: <b>Download Successful!!!</b>,
-                    error: <b>Failed to download Please try again.</b>,
-                  });
-                }}
-              >
-                <ArrowDownwardRoundedIcon />
-              </span>
-            </ImageListItem>
-          ))}
-        </ImageList>
-      ) : (
-        <Loader />
-      )}
+      <div style={{ marginTop: window.innerWidth < 600 ? "60px" : "20px" }}>
+        {photosState?.photos ? (
+          <ImageList variant="masonry" cols={cols}>
+            {photosState?.photos?.map((item, index) => (
+              <ImageTile item={item} />
+            ))}
+          </ImageList>
+        ) : (
+          <Loader />
+        )}
+      </div>
     </div>
   );
 };

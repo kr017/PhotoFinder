@@ -1,15 +1,19 @@
 import { makeStyles } from "@mui/styles";
-import { useLogin } from "../../context";
+import { useLogin, usePhotos } from "../../context";
 import EditIcon from "@mui/icons-material/Edit";
 import default_profile from "../../images/default_profile.jpg";
 import { useHistory } from "react-router-dom";
 import { Header } from "../Header/Header";
+import { ImageTile } from "../Image/Image";
+import { useState } from "react";
+import { ImageList } from "@mui/material";
 
 const useStyles = makeStyles({
   root: {
     paddingTop: "20vh",
     display: "flex",
-    margin: "2vh 20vw",
+    margin: "2vh 2vw",
+    justifyContent: "center",
   },
   profilePic: {
     height: "120px",
@@ -65,68 +69,79 @@ export const Profile = () => {
   const classes = useStyles();
   const history = useHistory();
   const { userState } = useLogin();
+  const { photosState, photosDispatch } = usePhotos();
+
+  const [cols, setCols] = useState(3);
 
   return (
-    <div className={classes.root}>
-      <Header />
-      <div className={classes.section1}>
-        <img
-          className={classes.profilePic}
-          src={
-            userState?.user?.profile_image?.large
-              ? userState?.user?.profile_image?.large
-              : default_profile
-          }
-          alt="profile_img"
-        />
-      </div>
-      <div className={classes.section2}>
-        <div className={classes.name}>
-          {userState?.user?.first_name && (
-            <span>{userState?.user?.first_name + " "}</span>
-          )}
-          {userState?.user?.last_name && (
-            <span> {" " + userState?.user?.last_name}</span>
-          )}
-
-          <span
-            className={classes.editContainer}
-            onClick={() => {
-              history.push("/editProfile");
-            }}
-          >
-            <EditIcon fontSize="small" />
-            Edit Profile
-          </span>
+    <div>
+      <div className={classes.root}>
+        <Header />
+        <div className={classes.section1}>
+          <img
+            className={classes.profilePic}
+            src={
+              userState?.user?.profile_image?.large
+                ? userState?.user?.profile_image?.large
+                : default_profile
+            }
+            alt="profile_img"
+          />
         </div>
+        <div className={classes.section2}>
+          <div className={classes.name}>
+            {userState?.user?.first_name && (
+              <span>{userState?.user?.first_name + " "}</span>
+            )}
+            {userState?.user?.last_name && (
+              <span> {" " + userState?.user?.last_name}</span>
+            )}
 
-        <div className={classes.social}>
-          {userState?.user?.social?.instagram_username && (
-            <div className={classes.insta}>
-              <a
-                className={classes.anchor}
-                href={`https://www.instagram.com/${userState?.user?.social?.instagram_username}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                INSTAGRAM
-              </a>
-            </div>
-          )}
-          {userState?.user?.social?.twitter_username && (
-            <div className={classes.twitter}>
-              <a
-                className={classes.anchor}
-                href={`https://twitter.com/${userState?.user?.social?.twitter_username}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                TWITTER
-              </a>
-            </div>
-          )}
+            <span
+              className={classes.editContainer}
+              onClick={() => {
+                history.push("/editProfile");
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </span>
+          </div>
+
+          <div className={classes.social}>
+            {userState?.user?.social?.instagram_username && (
+              <div className={classes.insta}>
+                <a
+                  className={classes.anchor}
+                  href={`https://www.instagram.com/${userState?.user?.social?.instagram_username}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  INSTAGRAM
+                </a>
+              </div>
+            )}
+            {userState?.user?.social?.twitter_username && (
+              <div className={classes.twitter}>
+                <a
+                  className={classes.anchor}
+                  href={`https://twitter.com/${userState?.user?.social?.twitter_username}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  TWITTER
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      <ImageList variant="masonry" cols={cols}>
+        {photosState?.photos
+          ?.filter(obj => obj.liked_by_user)
+          ?.map((item, index) => (
+            <ImageTile item={item} />
+          ))}
+      </ImageList>
     </div>
   );
 };
